@@ -34,7 +34,7 @@ uint8_t *hex2bin(const char *hex_string, size_t *out_length) {
     return ret;
 }
 
-char *bin2b64(const uint8_t *b, const size_t bin_len) {
+char *b64encode(const uint8_t *b, const size_t bin_len) {
     static char table[64] = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
         'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 
     size_t length;
     uint8_t *b = hex2bin(input, &length);
-    char *output = bin2b64(b, length);
+    char *output = b64encode(b, length);
     printf("%s\n", output);
     assert(strcmp(output, expected) == 0);
 }

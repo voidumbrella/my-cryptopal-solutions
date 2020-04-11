@@ -1,5 +1,5 @@
 /*
- * Impelment repeating-key XOR
+ * Implement repeating-key XOR
  */
 
 #include <assert.h>

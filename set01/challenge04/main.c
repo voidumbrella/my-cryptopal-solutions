@@ -76,7 +76,7 @@ double score_bin(const uint8_t *b, const size_t len) {
         case 'x': score +=  0.19; break;
         case 'y': score +=  1.72; break;
         case 'z': score +=  0.11; break;
-        case ' ': score +=  0.50; break;
+        case ' ': score += 12.50; break;
         case '.': score +=  6.50; break;
         case ',': score +=  6.10; break;
         case '"': score +=  2.67; break;
@@ -92,8 +92,8 @@ double score_bin(const uint8_t *b, const size_t len) {
 }
 
 int main(int argc, char *argv[]) {
-    FILE *input_file = fopen("input.txt", "r");
-    assert(input_file);
+    FILE *f = fopen("input.txt", "r");
+    assert(f);
 
     char *ciphertext;
     uint8_t *plaintext;
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 
     char line[BUFSIZ];
     size_t text_len;
-    while (fgets(line, BUFSIZ, input_file)) {
+    while (fgets(line, BUFSIZ, f)) {
         char *p;
         if ((p = strchr(line, '\n'))) {
             *p = '\0'; // strip newline

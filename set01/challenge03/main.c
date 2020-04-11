@@ -45,7 +45,7 @@ char *bin2hex(const uint8_t *b, const size_t len) {
     return ret;
 }
 
-double score_bin(const uint8_t *b, const size_t len) {
+double score_text(const uint8_t *b, const size_t len) {
     double score = 0;
     /* Basic English frequency analysis with data from somewhere */
     for (size_t i = 0; i < len; ++i) {
@@ -91,28 +91,31 @@ double score_bin(const uint8_t *b, const size_t len) {
     return score;
 }
 
+uint8_t break_single_key_xor(uint8_t *ciphertext, size_t length) {
+    double max_score = 0.;
+    uint8_t key;
+    for (int k = 0; k < 256; ++k) {
+        for (size_t i = 0; i < length; ++i) { ciphertext[i] ^= k; }
+        double score = score_text(ciphertext, length);
+        if (score > max_score) {
+            max_score = score;
+            key = k;
+        }
+        for (size_t i = 0; i < length; ++i) { ciphertext[i] ^= k; }
+    }
+    return key;
+}
+
 int main(int argc, char *argv[]) {
     static char *input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
     size_t length;
     uint8_t *ciphertext = hex2bin(input, &length);
 
-    uint8_t *plaintext, key;
-    double max_score = 0.;
-    for (int k = 0; k < 256; ++k) {
-        uint8_t *test = malloc(length);
-        memcpy(test, ciphertext, length);
-        for (size_t i = 0; i < length; ++i) {
-            test[i] ^= k;
-        }
-        double score = score_bin(test, length);
-        if (score > max_score) {
-            plaintext = test;
-            max_score = score;
-            key = k;
-        } else {
-            free(test);
-        }
+    uint8_t key = break_single_key_xor(ciphertext, length);
+    uint8_t *plaintext = malloc(length);
+    for (size_t i = 0; i < length; ++i) {
+        plaintext[i] = ciphertext[i] ^ key;
     }
     printf("Decoded \"%.*s\" with \"%c\" as the key\n", (int)length, plaintext, key);
 }
