@@ -1,9 +1,8 @@
 /*
- * Convert hex to base64
+ * Impelment repeating-key XOR
  */
 
 #include <assert.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -34,44 +33,34 @@ uint8_t *hex2bin(const char *hex_string, size_t *out_length) {
     return ret;
 }
 
-char *bin2b64(const uint8_t *b, const size_t bin_len) {
-    static char table[64] = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
-    };
-    size_t num_blocks = bin_len / 3 + (bin_len % 3? 1: 0);
-    char *ret = malloc(num_blocks * 4 + 1);
-    for (size_t i = 0; i < num_blocks; ++i) {
-        const uint8_t *p = &b[i*3];
-        char *r = &ret[i*4];
-
-        r[0] = table[(p[0] & 0xFC) >> 2];
-        if (i*3+1 >= bin_len) {
-            r[1] = table[(p[0] & 0x03) << 4];
-            r[2] = r[3] = '=';
-        } else if (i*3+2 >= bin_len) {
-            r[1] = table[(p[0] & 0x03) << 4 | p[1] >> 4];
-            r[2] = table[(p[1] & 0x0F) << 2];
-            r[3] = '=';
-        } else {
-            r[1] = table[(p[0] & 0x03) << 4 | p[1] >> 4];
-            r[2] = table[(p[1] & 0x0F) << 2 | p[2] >> 6];
-            r[3] = table[p[2] & 0x3F];
-        }
+char *bin2hex(const uint8_t *b, const size_t bin_len) {
+    char *ret = malloc(bin_len * 2 + 1);
+    for (size_t i = 0; i < bin_len; ++i) {
+        char hi = b[i] >> 4, lo = b[i] & 0xF;
+        ret[i*2] = hi + (hi < 10? '0': 'a' - 10);
+        ret[i*2+1] = lo + (lo < 10? '0': 'a' - 10);
     }
-    ret[num_blocks * 4] = '\0';
+    ret[bin_len * 2] = '\0';
     return ret;
 }
 
 int main(int argc, char *argv[]) {
-    static char *input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-    static char *expected = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+    static char *plaintext =
+        "Burning 'em, if you ain't quick and nimble\n"
+        "I go crazy when I hear a cymbal";
+    static char *expected =
+        "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272"
+        "a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+    static char *key = "ICE";
 
-    size_t length;
-    uint8_t *b = hex2bin(input, &length);
-    char *output = bin2b64(b, length);
-    printf("%s\n", output);
+    size_t text_len = strlen(plaintext);
+    size_t key_len = 3;
+
+    uint8_t *ciphertext = malloc(text_len);
+    for (size_t i = 0; i < text_len; ++i) {
+        ciphertext[i] = plaintext[i] ^ key[i % key_len];
+    }
+
+    char *output = bin2hex(ciphertext, text_len);
     assert(strcmp(output, expected) == 0);
 }
