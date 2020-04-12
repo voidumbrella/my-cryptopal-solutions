@@ -129,10 +129,8 @@ char *read_ignoring_newlines(FILE *f) {
     s = malloc(capacity);
     char *nl, *p = s;
     while (fgets(p, block_size, f)) {
-        // Why can't fgets return a pointer to the last character?
-        // What is the point of returning back the pointer that we already have?
-        if ((nl = strchr(p, '\n'))) { p = nl; *p = '\0'; }
-        else { p = strchr(p, '\0'); }
+        p += strcspn(p, "\n");
+        *p = '\0';
 
         length = p - s;
         if (length + block_size >= capacity) {
