@@ -12,10 +12,10 @@
 #include "aes.h"
 #include "utils.h"
 
-uint8_t key[16];
+struct aes_ctx ctx;
 
 int is_admin(uint8_t *profile, size_t len) {
-    aes_128_ecb_decrypt(profile, len, key);
+    aes_128_ecb_decrypt(&ctx, profile, len);
     assert(pkcs7_unpad(profile, len, 16, &len) == 0);
     return memmem(profile, len, (uint8_t *)"&role=admin", 10)? 1: 0;
 }
@@ -42,20 +42,22 @@ uint8_t *encrypted_profile(const char *email, size_t *out_len) {
     memcpy(buf, profile, profile_len);
     free(profile);
     pkcs7_pad(buf, profile_len, 16);
-    aes_128_ecb_encrypt(buf, padded_len, key);
+    aes_128_ecb_encrypt(&ctx, buf, padded_len);
 
     return buf;
-}
+}       
 
 int main() {
+    uint8_t key[16];
     fill_rand(key, 16);
+    aes_ctx_init(&ctx, key);
+
     {
         size_t len;
         uint8_t *profile = encrypted_profile("hacker@gmail.com&role=admin", &len);
         assert(!is_admin(profile, len));
         free(profile);
     }
-
 
     size_t len;
     // 1               2               3

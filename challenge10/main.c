@@ -1,3 +1,7 @@
+/*
+ * Implement CBC mode
+ */
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,6 +22,9 @@ int main() {
     uint8_t *key = (uint8_t *)"YELLOW SUBMARINE";
     uint8_t *iv  = (uint8_t *)"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
 
-    aes_128_cbc_decrypt(buffer, text_len, key, iv);
+    struct aes_ctx ctx;
+    aes_ctx_init(&ctx, key);
+    aes_ctx_set_iv(&ctx, iv);
+    aes_128_cbc_decrypt(&ctx, buffer, text_len);
     printf("%.*s", (int)text_len, buffer);
 }

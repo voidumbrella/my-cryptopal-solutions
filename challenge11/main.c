@@ -33,10 +33,14 @@ uint8_t *blackbox(const uint8_t *plaintext, const size_t len, size_t *out_len, i
     fill_rand(buf + prefix_len + len, suffix_len);
     pkcs7_pad(buf, total_len, 16);
 
-    if (mode == ECB)
-        aes_128_ecb_encrypt(buf, padded_len, key);
-    else
-        aes_128_cbc_encrypt(buf, padded_len, key, iv);
+    struct aes_ctx ctx;
+    aes_ctx_init(&ctx, key);
+    if (mode == ECB) {
+        aes_128_ecb_encrypt(&ctx, buf, padded_len);
+    } else {
+        aes_ctx_set_iv(&ctx, iv);
+        aes_128_cbc_encrypt(&ctx, buf, padded_len);
+    }
     return buf;
 }
 
@@ -69,7 +73,7 @@ int main() {
         "$$$$$$$$$$$$$$$$";
     size_t len = strlen((char *)plaintext);
 
-    int failure = 0, N = 100;
+    int failure = 0, N = 10000;
     for (int i = 0; i < N; ++i) {
         int mode, detected;
         size_t cipher_len;

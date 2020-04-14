@@ -10,7 +10,7 @@
 #include "aes.h"
 #include "utils.h"
 
-uint8_t key[16];
+struct aes_ctx ctx;
 uint8_t *unknown_string;
 size_t unknown_len;
 
@@ -24,7 +24,7 @@ uint8_t *blackbox(const uint8_t *plaintext, const size_t len, size_t *out_len) {
     memcpy(buf + len, unknown_string, unknown_len);
     pkcs7_pad(buf, total_len, 16);
 
-    aes_128_ecb_encrypt(buf, padded_len, key);
+    aes_128_ecb_encrypt(&ctx, buf, padded_len);
     return buf;
 }
 
@@ -53,7 +53,9 @@ void setup_blackbox() {
     unknown_string = b64decode(encoded, &unknown_len);
     free(encoded);
     
+    uint8_t key[16];
     fill_rand(key, 16);
+    aes_ctx_init(&ctx, key);
 }
 
 int main() {

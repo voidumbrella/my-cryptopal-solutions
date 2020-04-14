@@ -76,14 +76,16 @@ int main(int argc, char *argv[]) {
     assert(f);
     char *encoded = read_ignoring_newlines(f);
 
-    size_t text_len;
-    uint8_t *ciphertext = b64decode(encoded, &text_len);
+    size_t len;
+    uint8_t *buf = b64decode(encoded, &len);
     free(encoded);
 
-    uint8_t *plaintext = malloc(text_len);
-    aes_128_ecb_decrypt(ciphertext, text_len, (uint8_t *)"YELLOW SUBMARINE", plaintext);
-    printf("%.*s", (int)text_len, plaintext);
+    struct aes_ctx ctx;
+    aes_ctx_init(&ctx, (uint8_t *)"YELLOW SUBMARINE");
+    aes_128_ecb_encrypt(&ctx, buf, len);
+    aes_128_ecb_decrypt(&ctx, buf, len);
+    aes_128_ecb_decrypt(&ctx, buf, len);
+    printf("%.*s", (int)len, buf);
 
-    free(ciphertext);
-    free(plaintext);
+    free(buf);
 }
