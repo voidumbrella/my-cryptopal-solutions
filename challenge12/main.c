@@ -87,7 +87,6 @@ int main() {
         free(ciphertext);
     }
 
-    uint8_t last_byte_dict[256];
     uint8_t buf[len];
     memset(buf, '\xfe', len);
 
