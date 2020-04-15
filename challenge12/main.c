@@ -91,7 +91,7 @@ int main() {
     memset(buf, '\xfe', len);
 
     size_t foo;
-    uint16_t last_block[block_size];
+    uint8_t last_block[block_size];
     for (size_t i = 0; i < len; ++i) {
         memmove(buf, buf + 1, len - 1);
         uint8_t *ciphertext = blackbox(buf, len - i - 1, &foo);
