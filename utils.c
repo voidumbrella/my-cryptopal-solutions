@@ -151,7 +151,7 @@ void pkcs7_pad(uint8_t *s, size_t len, size_t block_size) {
 
 int pkcs7_unpad(uint8_t *s, size_t len, size_t *out_size) {
     uint8_t pad = s[len - 1];
-    if (pad > len)
+    if (pad > len || pad == 0)
         return -1;
 
     for (size_t i = 0; i < pad; ++i)
