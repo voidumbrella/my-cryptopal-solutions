@@ -149,11 +149,15 @@ void pkcs7_pad(uint8_t *s, size_t len, size_t block_size) {
         *(s+i) = c;
 }
 
-int pkcs7_unpad(uint8_t *s, size_t len, size_t block_size, size_t *out_size) {
+int pkcs7_unpad(uint8_t *s, size_t len, size_t *out_size) {
     uint8_t pad = s[len - 1];
+    if (pad > len)
+        return -1;
+
     for (size_t i = 0; i < pad; ++i)
         if (s[len - 1 - i] != pad)
             return -1;
+
     *out_size = len - pad;
     return 0;
 }
@@ -164,4 +168,3 @@ void fill_rand(uint8_t *dest, const size_t len) {
     assert(fread(dest, 1, len, rand_source) == len);
     fclose(rand_source);
 }
-

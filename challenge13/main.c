@@ -16,7 +16,7 @@ struct aes_ctx ctx;
 
 int is_admin(uint8_t *profile, size_t len) {
     aes_128_ecb_decrypt(&ctx, profile, len);
-    assert(pkcs7_unpad(profile, len, 16, &len) == 0);
+    assert(pkcs7_unpad(profile, len, &len) == 0);
     return memmem(profile, len, (uint8_t *)"&role=admin", 10)? 1: 0;
 }
 
