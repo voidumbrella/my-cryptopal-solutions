@@ -270,6 +270,10 @@ void aes_ctx_set_iv(struct aes_ctx *ctx, const uint8_t *iv) {
     memcpy(ctx->iv, iv, 16);
 }
 
+void aes_ctx_set_nonce(struct aes_ctx *ctx, const uint8_t *nonce) {
+    memcpy(ctx->nonce, nonce, 8);
+}
+
 void aes_128_encrypt_block(struct aes_ctx *ctx, uint8_t *block) {
     add_roundkey(block, ctx->round_keys[0]);
     for (size_t i = 1; i < NUM_ROUNDS; ++i) {
@@ -329,5 +333,33 @@ void aes_128_cbc_decrypt(struct aes_ctx *ctx, uint8_t *buf, size_t text_len) {
         for (size_t j = 0; j < 16; ++j)
             buf[i + j] ^= prev_block[j];
         memcpy(prev_block, curr_block, 16);
+    }
+}
+
+/*
+ * Format of block:
+ *
+ *          Little
+ *          endian
+ *   Nonce  counter
+ * |       |      |
+ * 0123456789ABCDEF
+ */
+void aes_128_ctr(struct aes_ctx *ctx, uint8_t *buf, size_t text_len) {
+    uint8_t block[16] = {0};
+    memcpy(block, ctx->nonce, 8);
+
+    for (size_t offset = 0; offset < text_len; offset += 16) {
+        uint8_t keystream[16] = {0};
+        memcpy(keystream, block, 16);
+        aes_128_encrypt_block(ctx, keystream);
+
+        for (size_t i = offset; i < offset + 16 && i < text_len; ++i) {
+            *(buf + i) ^= keystream[i % 16];
+        }
+
+        // little endian increment
+        size_t i = 8;
+        while (++block[i++] == 0 && i < 16);
     }
 }
