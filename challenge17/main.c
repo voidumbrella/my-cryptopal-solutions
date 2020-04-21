@@ -54,7 +54,6 @@ bool validate(const uint8_t *buf, const uint8_t *iv, size_t size) {
     aes_ctx_set_iv(&ctx, iv);
     aes_128_cbc_decrypt(&ctx, temp, size);
     int res = pkcs7_unpad(temp, size, &foo) == 0? true: false;
-    /* print_bin(temp, size); */
     free(temp);
     return res;
 }
@@ -64,7 +63,7 @@ void setup() {
     fill_rand(key, 16);
     fill_rand(iv, 16);
     aes_ctx_init(&ctx, key);
-    aes_ctx_init(&ctx, iv);
+    aes_ctx_set_iv(&ctx, iv);
 }
 
 void crack_block(const uint8_t *block, const uint8_t *iv, uint8_t *dest) {

@@ -52,7 +52,7 @@ void setup() {
     fill_rand(key, 16);
     fill_rand(iv, 16);
     aes_ctx_init(&ctx, key);
-    aes_ctx_init(&ctx, iv);
+    aes_ctx_set_iv(&ctx, iv);
 }
 
 int main() {
@@ -63,17 +63,17 @@ int main() {
      *
      * 0               16              32    38   43
      * |               |               |               |
-     * comment1=cooking%20MCs;userdata=@_____@____@____AadminBtrueA...
-     *                                 AadminBtrueA
+     * comment1=cooking%20MCs;userdata=@_____@____@____AadminAtrueA...
+     *                                 AadminAtrueA
      *
      * xoring `block[3][0]` with `; ^ A` also xors `block[4][0]` with `; ^ A`
      * then `block[4][0] = A ^ (; ^ A) = ;`
      */
     size_t size;
-    uint8_t *foo = gen_comment("@_____@____@____AadminEtrueA", &size);
-    foo[32] ^= 'z';
-    foo[38] ^= 'x';
-    foo[43] ^= 'z';
+    uint8_t *foo = gen_comment("@_____@____@____AadminAtrueA", &size);
+    foo[32] ^= ';' ^ 'A';
+    foo[38] ^= '=' ^ 'A';
+    foo[43] ^= ';' ^ 'A';
     assert(authenticate(foo, size) == 1);
     free(foo);
 }

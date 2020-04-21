@@ -361,4 +361,5 @@ void aes_128_ctr(struct aes_ctx *ctx, uint8_t *buf, size_t text_len) {
         // little endian increment
         size_t i = 8;
         while (++block[i++] == 0 && i < 16);
-    } }
+    }
+}
