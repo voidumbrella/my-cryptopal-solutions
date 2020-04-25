@@ -20,8 +20,11 @@ uint8_t *sha1_mac(const uint8_t *message, size_t size,
     memcpy(buf, secretkey, keysize);
     memcpy(buf + keysize, message, size);
 
+    struct sha1_ctx ctx;
+    sha1_init(&ctx);
+
     uint8_t *mac = malloc(SHA1_HASH_SIZE);
-    sha1_hash(buf, size + keysize, mac);
+    sha1_hash(&ctx, buf, size + keysize, mac);
     return mac;
 }
 
