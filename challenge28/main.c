@@ -20,11 +20,8 @@ uint8_t *sha1_mac(const uint8_t *message, size_t size,
     memcpy(buf, secretkey, keysize);
     memcpy(buf + keysize, message, size);
 
-    struct sha1_ctx ctx;
-    sha1_init(&ctx);
-
     uint8_t *mac = malloc(SHA1_HASH_SIZE);
-    sha1_hash(&ctx, buf, size + keysize, mac);
+    sha1_hash(buf, size + keysize, mac);
     return mac;
 }
 
@@ -43,7 +40,6 @@ int main() {
                         "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
     size_t size = strlen((char *)message);
 
-    size_t mac_size;
     uint8_t *mac = sha1_mac(message, size, key, keysize);
 
     assert(is_authentic(message, size, mac) == true);
@@ -51,4 +47,5 @@ int main() {
     // Verify that we cannot modify the message
     message[0] = 'A';
     assert(is_authentic(message, size, mac) == false);
+    puts("OK");
 }
