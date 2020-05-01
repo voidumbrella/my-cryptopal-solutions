@@ -46,6 +46,7 @@ void setup_secret_key(void) {
      */
     FILE *f = fopen("/dev/urandom", "r");
     fread(&secret_key_size, 1, sizeof (size_t), f);
+    fclose(f);
     secret_key_size %= 990;
     secret_key_size += 10;
 
